@@ -100,37 +100,48 @@ if choice == 'NLP process':
     nlp_task = ["Tokenization","Lemmatization","NER","POS Tags"]
     task_choice = st.selectbox("Choisissez la tâche PNL",nlp_task)
     if st.button("Analyze"):
-        st.info("Original Text::\n{}".format(raw_text))
+        if raw_text != "":
+            st.info("Original Text::\n{}".format(raw_text))
+            docx = nlp(raw_text)
+            if task_choice == 'Tokenization':
+                result = [token.text for token in docx ]
+            elif task_choice == 'Lemmatization':
+                result = ["'Token':{},'Lemma':{}".format(token.text,token.lemma_) for token in docx]
+            elif task_choice == 'NER':
+                result = [(entity.text,entity.label_)for entity in docx.ents]
+            elif task_choice == 'POS Tags':
+                result = ["'Token':{},'POS':{},'Dependency':{}".format(word.text,word.tag_,word.dep_) for word in docx]
+            st.json(result)
+        else:
+            st.error(
+            'Veuillez saisir un texte qui sera traiter')
 
-        docx = nlp(raw_text)
-        if task_choice == 'Tokenization':
-            result = [token.text for token in docx ]
-        elif task_choice == 'Lemmatization':
-            result = ["'Token':{},'Lemma':{}".format(token.text,token.lemma_) for token in docx]
-        elif task_choice == 'NER':
-            result = [(entity.text,entity.label_)for entity in docx.ents]
-        elif task_choice == 'POS Tags':
-            result = ["'Token':{},'POS':{},'Dependency':{}".format(word.text,word.tag_,word.dep_) for word in docx]
-
-        st.json(result)
+    
 
     if st.button("Tabuler"):
-        docx = nlp(raw_text)
-        c_tokens = [token.text for token in docx ]
-        c_lemma = [token.lemma_ for token in docx ]
-        c_pos = [token.pos_ for token in docx ]
-    
-        new_df = pd.DataFrame(zip(c_tokens,c_lemma,c_pos),columns=['Tokens','Lemma','POS'])
-        st.dataframe(new_df)
-    
+        if raw_text != "":
+            docx = nlp(raw_text)
+            c_tokens = [token.text for token in docx ]
+            c_lemma = [token.lemma_ for token in docx ]
+            c_pos = [token.pos_ for token in docx ]
+        
+            new_df = pd.DataFrame(zip(c_tokens,c_lemma,c_pos),columns=['Tokens','Lemma','POS'])
+            st.dataframe(new_df)
+        else:
+            st.error(
+            'Veuillez saisir un texte qui sera traiter')
+
     
     if st.checkbox("WordCloud"):
-        c_text = raw_text
-        wordcloud = WordCloud().generate(c_text)
-        plt.imshow(wordcloud,interpolation='bilinear')
-        plt.axis("off")
-        st.pyplot()
-
+        if raw_text != "":
+            c_text = raw_text
+            wordcloud = WordCloud().generate(c_text)
+            plt.imshow(wordcloud,interpolation='bilinear')
+            plt.axis("off")
+            st.pyplot()
+        else:
+            st.error(
+            'Veuillez saisir un texte qui sera traiter')
 
 
 if choice == 'Machine learning':
