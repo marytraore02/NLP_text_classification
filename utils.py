@@ -13,6 +13,9 @@ dict_category = {
     4: "Technology"
 }
 
+# Charger le modele
+# lr_model=pickle.load(open('models/lr-model.pkl','rb'))
+
 def get_category(predictions: np.ndarray) -> str:
   """
   Get the category of the maximum score in `predictions`.
@@ -78,3 +81,13 @@ class CnnClassifier:
       """
       predictions = self.cnn_model.predict(text_vector)
       return predictions
+
+
+class LrClassifier:
+    """ test"""
+    def __init__(self) -> None:
+      # lr_model=pickle.load(open('models/lr-model.pkl','rb'))
+      with open("models/lr-model.pkl", 'rb') as handle:
+          self.lr_model = pickle.load(handle)
+    def predict(self, text_vector: np.ndarray)-> np.ndarray:
+        return self.lr_model.predict(text_vector)

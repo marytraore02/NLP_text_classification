@@ -5,9 +5,10 @@ nlp = spacy.load("en_core_web_sm")
 import streamlit as st
 import matplotlib.pyplot as plt 
 import matplotlib
-from utils import CnnClassifier, get_category
+from utils import CnnClassifier, get_category, LrClassifier
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
-from PIL import Image
+
+
 # for custom CSS style
 with open("style.css") as f:
     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
@@ -145,4 +146,42 @@ if choice == 'NLP process':
 
 
 if choice == 'Machine learning':
-    st.write("test")
+    with st.form(key="input_form"):
+        options = st.multiselect(
+            'Selectionner un model',
+            ['Logistic Regression'])
+
+        text = st.text_area(label="Text d'entrer", height=200,
+        placeholder="Entrez le texte")
+
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            if text != "":
+                with st.spinner("Your text is being predicted..."):
+                    if "Logistic Regression" in options and len(options) == 1:
+                        model = LrClassifier()
+                        predictions = model.predict(text)
+                        
+                    else:
+                        st.error(
+                            "Veuillez sélectionner un modèle à prédire")
+                        st.stop()
+    
+                col1, col2 = st.columns(2)
+                with col1:
+                    predicted_category = get_category(predictions)
+                    st.write("Catégorie prédit")
+                    st.success(predicted_category)
+    
+                with col2:
+                    st.write("Score de prédiction:")
+                    st.success(f"{np.max(predictions)*100:.2f} %")
+        
+                    st.write("Graphique de prédiction:")
+                    df = pd.DataFrame(data=predictions, columns=[
+                                  "Business", "Entertainment", "Politics", "Sports", "Technology"])
+                    st.bar_chart(df.T, height=550)
+            else:
+                st.error(
+                'Veuillez saisir un texte qui souhaite être prédit')
+
