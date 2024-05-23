@@ -10,8 +10,8 @@ from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 
 # for custom CSS style
-with open("style.css") as f:
-    st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
+# with open("style.css") as f:
+#     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
     
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -19,26 +19,69 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # st.title("News Classifier")
 # st.subheader("ML App with Streamlit")
+
+
+activity = ['Machine learning','Deep learning', 'NLP process']
+st.sidebar.subheader("Selectionner un type de model")
+with st.sidebar:
+    choice = st.radio(
+        "Sélection",activity)
+
+
 html_temp = """
 <div style="background-color:blue;padding:10px">
 <h1 style="color:white;text-align:center;">Web-app-text-classification </h1>
 </div>
 
 """
-st.markdown(html_temp,unsafe_allow_html=True)
-st.info("Natural Language Processing of Text")
 
 
-activity = ['Machine learning','Deep learning', 'NLP process']
-# choice = st.sidebar.selectbox("Selectionner un type",activity)
-st.sidebar.subheader("Selectionner un type de model")
+if choice == 'Machine learning':
+    st.markdown(html_temp,unsafe_allow_html=True)
+    st.info("Machine Learning content")
+    with st.form(key="input_form"):
+        options = st.multiselect(
+            'Selectionner un model',
+            ['Logistic Regression'])
 
-with st.sidebar:
-    choice = st.radio(
-        "Sélection",activity)
+        text = st.text_area(label="Text d'entrer", height=200,
+        placeholder="Entrez le texte")
 
-    
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            if text != "":
+                with st.spinner("Your text is being predicted..."):
+                    if "Logistic Regression" in options and len(options) == 1:
+                        model = LrClassifier()
+                        predictions = model.predict(text)
+
+                    else:
+                        st.error(
+                            "Veuillez sélectionner un modèle à prédire")
+                        st.stop()
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    predicted_category = get_category(predictions)
+                    st.write("Catégorie prédit")
+                    st.success(predicted_category)
+
+                with col2:
+                    st.write("Score de prédiction:")
+                    st.success(f"{np.max(predictions)*100:.2f} %")
+
+                    st.write("Graphique de prédiction:")
+                    df = pd.DataFrame(data=predictions, columns=[
+                                  "Business", "Entertainment", "Politics", "Sports", "Technology"])
+                    st.bar_chart(df.T, height=550)
+            else:
+                st.error(
+                'Veuillez saisir un texte qui souhaite être prédit')
+
+
 if choice == 'Deep learning':
+    st.markdown(html_temp,unsafe_allow_html=True)
+    st.info("Deep learning content")
     with st.form(key="input_form"):
         options = st.multiselect(
             'Selectionner un model',
@@ -97,6 +140,8 @@ if choice == 'Deep learning':
 
 
 if choice == 'NLP process':
+    st.markdown(html_temp,unsafe_allow_html=True)
+    st.info("Natural Language Processing of Text")
     raw_text = st.text_area("Entrez le texte")
     nlp_task = ["Tokenization","Lemmatization","NER","POS Tags"]
     task_choice = st.selectbox("Choisissez la tâche PNL",nlp_task)
@@ -143,45 +188,3 @@ if choice == 'NLP process':
         else:
             st.error(
             'Veuillez saisir un texte qui sera traiter')
-
-
-if choice == 'Machine learning':
-    with st.form(key="input_form"):
-        options = st.multiselect(
-            'Selectionner un model',
-            ['Logistic Regression'])
-
-        text = st.text_area(label="Text d'entrer", height=200,
-        placeholder="Entrez le texte")
-
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            if text != "":
-                with st.spinner("Your text is being predicted..."):
-                    if "Logistic Regression" in options and len(options) == 1:
-                        model = LrClassifier()
-                        predictions = model.predict(text)
-                        
-                    else:
-                        st.error(
-                            "Veuillez sélectionner un modèle à prédire")
-                        st.stop()
-    
-                col1, col2 = st.columns(2)
-                with col1:
-                    predicted_category = get_category(predictions)
-                    st.write("Catégorie prédit")
-                    st.success(predicted_category)
-    
-                with col2:
-                    st.write("Score de prédiction:")
-                    st.success(f"{np.max(predictions)*100:.2f} %")
-        
-                    st.write("Graphique de prédiction:")
-                    df = pd.DataFrame(data=predictions, columns=[
-                                  "Business", "Entertainment", "Politics", "Sports", "Technology"])
-                    st.bar_chart(df.T, height=550)
-            else:
-                st.error(
-                'Veuillez saisir un texte qui souhaite être prédit')
-
