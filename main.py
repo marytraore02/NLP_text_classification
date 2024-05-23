@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import joblib,os
 import spacy
 nlp = spacy.load("en_core_web_sm")
 import streamlit as st
@@ -19,6 +20,19 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # st.title("News Classifier")
 # st.subheader("ML App with Streamlit")
+# load Vectorizer For Gender Prediction
+news_vectorizer = open("tokenizers/vectorizer.pkl","rb")
+news_cv = joblib.load(news_vectorizer)
+
+def load_prediction_models(model_file):
+    loaded_model = joblib.load(open(os.path.join(model_file),"rb"))
+    return loaded_model
+
+# Get the Keys
+def get_key(val,my_dict):
+    for key,value in my_dict.items():
+        if val == value:
+            return key
 
 
 activity = ['Machine learning','Deep learning', 'NLP process']
@@ -39,6 +53,8 @@ html_temp = """
 if choice == 'Machine learning':
     st.markdown(html_temp,unsafe_allow_html=True)
     st.info("Machine Learning content")
+    prediction_labels = {'business': 0,'tech': 1,'sport': 2,'health': 3,'politics': 4,'entertainment': 5}
+
     with st.form(key="input_form"):
         options = st.multiselect(
             'Selectionner un model',
@@ -52,8 +68,18 @@ if choice == 'Machine learning':
             if text != "":
                 with st.spinner("Your text is being predicted..."):
                     if "Logistic Regression" in options and len(options) == 1:
-                        model = LrClassifier()
-                        predictions = model.predict(text)
+
+                        st.text("Original Text::\n{}".format(text))
+                        # model = LrClassifier()
+                        # text_vector = model.read_extract_text_file(text)
+                        # predictions = model.predict(text)
+                        # predictions = model.predict_result(text)
+                        vect_text = news_cv.transform([text]).toarray()
+                        predictor = load_prediction_models("models/lr-model.pkl")
+                        predictions = predictor.predict(vect_text)
+                        final_result = get_key(predictions,prediction_labels)
+                        st.success("News Categorized as:: {}".format(final_result))
+                        # predictions = model.predict(text_vector)
 
                     else:
                         st.error(
