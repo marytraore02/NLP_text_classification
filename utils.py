@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 import pandas as pd
+import joblib,os
 from tensorflow import keras
 from keras.utils import pad_sequences
 
@@ -94,8 +95,11 @@ class LrClassifier:
         #       "models/lr-model.pkl")
         with open("models/lr-model.pkl", 'rb') as handle:
           self.lr_model = pickle.load(handle)
-        with open("tokenizers/tfidf.pkl", 'rb') as handle:
+        with open("tokenizers/vectorizer.pkl", 'rb') as handle:
             self.lr_vectorizer = pickle.load(handle)
+        # self.news_vectorizer = open("tokenizers/vectorizer.pkl","rb")
+        # self.news_cv = joblib.load(news_vectorizer)
+
 
     def convert_text_to_vector(self, text: str) -> np.ndarray:
         text = pd.Series(text)
@@ -123,9 +127,10 @@ class LrClassifier:
         # clean_text_data = preprocess_data(text_data)
 
         # TF-IDF
-        data = self.lr_vectorizer.transform([text])
+        data = self.lr_vectorizer.transform([text]).toarray()
         # Model
         y_pred = self.lr_model.predict(data.A)
         # y_pred = trained_models_tfidf[2].predict(data.A)
         result = f"Le document donné est lié à : {dict_category[y_pred[0]]}"
+        
         return result
