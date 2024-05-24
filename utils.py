@@ -14,9 +14,6 @@ dict_category = {
     4: "Technology"
 }
 
-# Charger le modele
-# lr_model=pickle.load(open('models/lr-model.pkl','rb'))
-
 
 def get_category(predictions: np.ndarray) -> str:
     """
@@ -101,36 +98,26 @@ class LrClassifier:
         # self.news_cv = joblib.load(news_vectorizer)
 
 
-    def convert_text_to_vector(self, text: str) -> np.ndarray:
+    def convert_text_to_vector_lr(self, text: str) -> np.ndarray:
         text = pd.Series(text)
-        text_vector = self.lr_tokenizer.texts_to_sequences(text)
+        print(text)
+        text_vector = self.lr_vectorizer.texts_to_sequences(text)
         text_vector_padded = pad_sequences(text_vector,
                                            maxlen=500,
                                            padding="post",
                                            truncating="post")
+        print(text_vector_padded)
         return text_vector_padded
 
     def predict(self, text_vector: np.ndarray) -> np.ndarray:
         return self.lr_model.predict(text_vector)
-
-
-
-    # def read_extract_text_file(self, text: str):
-    #     with open(text,'r',encoding='latin-1') as file:
-    #         data = file.readlines()
-    #         text_data= " ".join(data)
-    #     return text_data
-
     
     def predict_result(self, text: str):
-        # text_data = read_extract_text_file(path)
-        # clean_text_data = preprocess_data(text_data)
-
         # TF-IDF
-        data = self.lr_vectorizer.transform([text]).toarray()
+        data = self.lr_vectorizer.transform([text])
         # Model
         y_pred = self.lr_model.predict(data.A)
         # y_pred = trained_models_tfidf[2].predict(data.A)
         result = f"Le document donné est lié à : {dict_category[y_pred[0]]}"
-        
         return result
+

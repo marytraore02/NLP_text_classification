@@ -9,45 +9,34 @@ import matplotlib
 from utils import CnnClassifier, get_category, LrClassifier
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # for custom CSS style
 # with open("style.css") as f:
 #     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
     
-st.set_option('deprecation.showPyplotGlobalUse', False)
-
-# st.header("Web-app-text-classification")
-
-# st.title("News Classifier")
-# st.subheader("ML App with Streamlit")
-# load Vectorizer For Gender Prediction
-
-# # Get the Keys
-# def get_key(val,my_dict):
-#     for key,value in my_dict.items():
-#         if val == value:
-#             return key
 
 
 activity = ['Machine learning','Deep learning', 'NLP process']
-st.sidebar.subheader("Selectionner un type de model")
+st.sidebar.title("NLP")
+st.sidebar.markdown("""
+Le traitement du langage naturel(NLP) consiste à utiliser des ordinateurs pour traiter du texte ou de la parole en langage naturel. 
+""")
 with st.sidebar:
     choice = st.radio(
-        "Sélection",activity)
+        "Selectionner un type de model",activity)
 
 
 html_temp = """
 <div style="background-color:blue;padding:10px">
 <h1 style="color:white;text-align:center;">Web-app-text-classification </h1>
-</div>
+</div>"""
 
-"""
+st.markdown(html_temp,unsafe_allow_html=True)
 
 
 if choice == 'Machine learning':
-    st.markdown(html_temp,unsafe_allow_html=True)
     st.info("Machine Learning content")
-    prediction_labels = {'business': 0,'tech': 1,'sport': 2,'health': 3,'politics': 4,'entertainment': 5}
 
     with st.form(key="input_form"):
         options = st.multiselect(
@@ -60,14 +49,15 @@ if choice == 'Machine learning':
         submitted = st.form_submit_button("Submit")
         if submitted:
             if text != "":
-                with st.spinner("Your text is being predicted..."):
+                with st.spinner("Votre texte est en cours de prédiction..."):
                     if "Logistic Regression" in options and len(options) == 1:
 
                         st.text("Original Text::\n{}".format(text))
                         model = LrClassifier()
                         # text_vector = model.read_extract_text_file(text)
-                        # predictions = model.predict(text_vector)
+                        # text_vector = model.convert_text_to_vector_lr(text)
                         predictions = model.predict_result(text)
+                        # predictions = model.predict(text_vector)
                     
                         # vect_text = news_cv.transform([text]).toarray()
                         # predictor = load_prediction_models("models/lr-model.pkl")
@@ -114,7 +104,7 @@ if choice == 'Deep learning':
         submitted = st.form_submit_button("Submit")
         if submitted:
             if text != "":
-                with st.spinner("Your text is being predicted..."):
+                with st.spinner("Votre texte est en cours de prédiction..."):
                     if "CNN" in options and len(options) == 1:
                         model = CnnClassifier()
                         text_vector = model.convert_text_to_vector(text)
