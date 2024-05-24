@@ -6,8 +6,9 @@ nlp = spacy.load("en_core_web_sm")
 import streamlit as st
 import matplotlib.pyplot as plt 
 import matplotlib
-from utils import CnnClassifier, get_category, LrClassifier
+from utils import CnnClassifier, get_category,get_cat, LrClassifier
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from PIL import Image
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -31,8 +32,10 @@ html_temp = """
 <div style="background-color:blue;padding:10px">
 <h1 style="color:white;text-align:center;">Web-app-text-classification </h1>
 </div>"""
-
 st.markdown(html_temp,unsafe_allow_html=True)
+# image = Image.open('images/speech-text.png')
+image = Image.open('img/nlp.jpeg')
+st.image(image)
 
 
 if choice == 'Machine learning':
@@ -56,16 +59,9 @@ if choice == 'Machine learning':
                         model = LrClassifier()
                         # text_vector = model.read_extract_text_file(text)
                         # text_vector = model.convert_text_to_vector_lr(text)
-                        predictions = model.predict_result(text)
-                        # predictions = model.predict(text_vector)
+                        text_vector = model.predict_result(text)
+                        predictions, pred_proba = model.predict(text_vector)
                     
-                        # vect_text = news_cv.transform([text]).toarray()
-                        # predictor = load_prediction_models("models/lr-model.pkl")
-                        # predictions = predictor.predict(vect_text)
-                        # final_result = get_key(predictions,prediction_labels)
-                        # st.success("News Categorized as:: {}".format(final_result))
-                        # predictions = model.predict(text_vector)
-
                     else:
                         st.error(
                             "Veuillez sélectionner un modèle à prédire")
@@ -73,25 +69,24 @@ if choice == 'Machine learning':
 
                 col1, col2 = st.columns(2)
                 with col1:
-                    predicted_category = get_category(predictions)
+                    predicted_category = get_category(pred_proba)
                     st.write("Catégorie prédit")
                     st.success(predicted_category)
 
                 with col2:
                     st.write("Score de prédiction:")
-                    st.success(f"{np.max(predictions)*100:.2f} %")
+                    st.success(f"{np.max(pred_proba)*100:.2f} %")
 
-                    st.write("Graphique de prédiction:")
-                    df = pd.DataFrame(data=predictions, columns=[
+                st.write("Graphique de prédiction:")
+                df = pd.DataFrame(data=pred_proba, columns=[
                                   "Business", "Entertainment", "Politics", "Sports", "Technology"])
-                    st.bar_chart(df.T, height=550)
+                st.bar_chart(df.T, height=550)
             else:
                 st.error(
                 'Veuillez saisir un texte qui souhaite être prédit')
 
 
 if choice == 'Deep learning':
-    st.markdown(html_temp,unsafe_allow_html=True)
     st.info("Deep learning content")
     with st.form(key="input_form"):
         options = st.multiselect(
@@ -110,22 +105,6 @@ if choice == 'Deep learning':
                         text_vector = model.convert_text_to_vector(text)
                         predictions = model.predict(text_vector)
     
-                    # elif "GRU" in options and len(options) == 1:
-                    #     model = GruClassifier()
-                    #     text_vector = model.convert_text_to_vector(text)
-                    #     predictions = model.predict(text_vector)
-    
-                    # elif len(options) == 2:
-                    #     lstm_model = LstmClassifier()
-                    #     lstm_text_vector = lstm_model.convert_text_to_vector(text)
-                    #     lstm_predictions = lstm_model.predict(lstm_text_vector)
-    
-                    #     gru_model = GruClassifier()
-                    #     gru_text_vector = gru_model.convert_text_to_vector(text)
-                    #     gru_predictions = gru_model.predict(gru_text_vector)
-    
-                    #     predictions = (lstm_predictions + gru_predictions) / 2
-    
                     else:
                         st.error(
                             "Veuillez sélectionner un modèle à prédire")
@@ -140,6 +119,7 @@ if choice == 'Deep learning':
                 with col2:
                     st.write("Score de prédiction:")
                     st.success(f"{np.max(predictions)*100:.2f} %")
+
     
                 st.write("Graphique de prédiction:")
                 df = pd.DataFrame(data=predictions, columns=[
@@ -151,7 +131,6 @@ if choice == 'Deep learning':
 
 
 if choice == 'NLP process':
-    st.markdown(html_temp,unsafe_allow_html=True)
     st.info("Natural Language Processing of Text")
     raw_text = st.text_area("Entrez le texte")
     nlp_task = ["Tokenization","Lemmatization","NER","POS Tags"]

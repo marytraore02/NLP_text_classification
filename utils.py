@@ -13,7 +13,10 @@ dict_category = {
     3: "Sports",
     4: "Technology"
 }
-
+def get_cat(predictions: np.ndarray) -> str:
+    predicted_index = dict_category[predictions[0]]
+    print(predicted_index)
+    return predicted_index
 
 def get_category(predictions: np.ndarray) -> str:
     """
@@ -80,6 +83,7 @@ class CnnClassifier:
           the score of each category.
       """
         predictions = self.cnn_model.predict(text_vector)
+        print(predictions)
         return predictions
 
 
@@ -87,37 +91,32 @@ class LrClassifier:
     """ test"""
 
     def __init__(self) -> None:
-        # self.lr_vectorizer=pickle.load(open('tokenizers/vectorizer.pkl', 'rb'))
-        # self.lr_model = keras.models.load_model(
-        #       "models/lr-model.pkl")
-        with open("models/lr-model.pkl", 'rb') as handle:
+        with open("models/lr_model.pkl", 'rb') as handle:
           self.lr_model = pickle.load(handle)
         with open("tokenizers/vectorizer.pkl", 'rb') as handle:
             self.lr_vectorizer = pickle.load(handle)
-        # self.news_vectorizer = open("tokenizers/vectorizer.pkl","rb")
-        # self.news_cv = joblib.load(news_vectorizer)
-
-
-    def convert_text_to_vector_lr(self, text: str) -> np.ndarray:
-        text = pd.Series(text)
-        print(text)
-        text_vector = self.lr_vectorizer.texts_to_sequences(text)
-        text_vector_padded = pad_sequences(text_vector,
-                                           maxlen=500,
-                                           padding="post",
-                                           truncating="post")
-        print(text_vector_padded)
-        return text_vector_padded
-
-    def predict(self, text_vector: np.ndarray) -> np.ndarray:
-        return self.lr_model.predict(text_vector)
     
     def predict_result(self, text: str):
-        # TF-IDF
-        data = self.lr_vectorizer.transform([text])
-        # Model
-        y_pred = self.lr_model.predict(data.A)
-        # y_pred = trained_models_tfidf[2].predict(data.A)
-        result = f"Le document donné est lié à : {dict_category[y_pred[0]]}"
-        return result
+        text = [f'{text}']
+        print(text)
+        text_vector = self.lr_vectorizer.transform(text).toarray()
+        print(text_vector)
+        print(type(text_vector))
+        return text_vector
+
+    def predict(self, text_vector: np.ndarray) -> np.ndarray:
+        prediction = self.lr_model.predict(text_vector)
+        pred_proba = self.lr_model.predict_proba(text_vector)
+        print(prediction)
+        print(pred_proba)
+        print(type(prediction))
+        pred = dict_category[prediction[0]]
+        print(pred)
+        return prediction, pred_proba
+
+
+
+
+
+    
 
