@@ -32,7 +32,7 @@ with st.sidebar:
 
 html_temp = """
 <div style="background-color:blue;padding:10px">
-<h1 style="color:white;text-align:center;">Web-app-text-classification </h1>
+<h1 style="color:white;text-align:center;">NLP-text-classification </h1>
 </div>"""
 st.markdown(html_temp,unsafe_allow_html=True)
 # image = Image.open('images/speech-text.png')
