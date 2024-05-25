@@ -9,6 +9,8 @@ import matplotlib
 from utils import CnnClassifier, get_category,get_cat, LrClassifier
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from PIL import Image
+import time
+
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -36,6 +38,19 @@ st.markdown(html_temp,unsafe_allow_html=True)
 # image = Image.open('images/speech-text.png')
 image = Image.open('img/nlp.jpeg')
 st.image(image)
+
+
+def progress():
+    my_bar = st.progress(0)
+    for percent_complete in range(100):
+        time.sleep(0.01)
+        my_bar.progress(percent_complete + 1)
+        if percent_complete == 50:
+            st.write("**Graphique de prédiction:**")
+        my_bar.progress(percent_complete + 1)
+
+
+
 
 
 if choice == 'Machine learning':
@@ -76,11 +91,11 @@ if choice == 'Machine learning':
                 with col2:
                     st.write("Score de prédiction:")
                     st.success(f"{np.max(pred_proba)*100:.2f} %")
-
-                st.write("Graphique de prédiction:")
+                progress()
                 df = pd.DataFrame(data=pred_proba, columns=[
                                   "Business", "Entertainment", "Politics", "Sports", "Technology"])
                 st.bar_chart(df.T, height=550)
+                
             else:
                 st.error(
                 'Veuillez saisir un texte qui souhaite être prédit')
@@ -120,8 +135,7 @@ if choice == 'Deep learning':
                     st.write("Score de prédiction:")
                     st.success(f"{np.max(predictions)*100:.2f} %")
 
-    
-                st.write("Graphique de prédiction:")
+                progress()
                 df = pd.DataFrame(data=predictions, columns=[
                                   "Business", "Entertainment", "Politics", "Sports", "Technology"])
                 st.bar_chart(df.T, height=550)
