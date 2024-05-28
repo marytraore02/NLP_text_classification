@@ -1,11 +1,13 @@
-name: NLP text classification
+name: NLP text classification process CI/CD
 
 # Processus du pipeline CI
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
@@ -14,16 +16,47 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v3
+
       # Docker image 
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/nlp-app:v1 .
+        # run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/nlp-app:$(date +%s)
+        run: docker build -t nlt-text-classification -f Dockerfile .
 
+      # Lister les images
+      - name: List of Docker images
+        run: docker image ls
+
+      # Lancer le conteneur docker
+      - name: Run Docker Container
+        run: docker run -d -p 8501:8501 nlt-text-classification
+
+      # Lister les conteneur
+      - name: List of Docker containers
+        run: docker ps -a
+
+      # Filtrer l'ID des conteneurs pour les images suivantes
+      - name: List of Docker container Filter
+        run: |
+          docker ps --filter "ancestor=nlt-text-classification" -q
+          
+      # Me connecter sur dockerHub
       - name: Login to Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        run: | # log into docker hub account
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      # Builder l'image docker
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/nlt-text-classification:$(date +%s)
 
       - name: Docker Push
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/nlp-app:v1
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/nlt-text-classification:$(date +%s)
 
+      # Arreter le conteneur filter
+      - name: Stop Docker Container
+        run: docker stop $(docker ps --filter "ancestor=nlt-text-classification" -q)
+    
 # Processus du pipeline CD
   deploy:
     needs: build
