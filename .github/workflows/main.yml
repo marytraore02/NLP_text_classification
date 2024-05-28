@@ -2,7 +2,7 @@ name: NLP text classification process CI/CD
 
 on: 
   push:
-    branches: [ "test" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -17,9 +17,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       # Docker image 
-      - name: Build Docker Image
-        
-        # run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/nlp-app:$(date +%s)
+      - name: Build Docker Image        
         run: docker build -t nlt-text-classification -f Dockerfile .
 
       # Lister les images
