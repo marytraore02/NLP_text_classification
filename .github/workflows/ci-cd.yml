@@ -24,7 +24,7 @@ jobs:
       - name: Docker Push
         run: docker push ${{ secrets.DOCKER_USERNAME }}/nlp-app:v1
 
-# Processus du pipeline CI
+# Processus du pipeline CD
   deploy:
     needs: build
     runs-on: ubuntu-latest
