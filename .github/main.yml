@@ -1,13 +1,10 @@
 name: NLP text classification process CI/CD
 
-# Processus du pipeline CI
 on:
   push:
-    branches:
-      - main
+    branches: [ "test" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -21,6 +18,7 @@ jobs:
 
       # Docker image 
       - name: Build Docker Image
+        
         # run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/nlp-app:$(date +%s)
         run: docker build -t nlt-text-classification -f Dockerfile .
 
@@ -40,23 +38,29 @@ jobs:
       - name: List of Docker container Filter
         run: |
           docker ps --filter "ancestor=nlt-text-classification" -q
-          
+
       # Me connecter sur dockerHub
       - name: Login to Docker Hub
         run: | # log into docker hub account
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
+      # Recuperer la date et l'heure aujourd'hui
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d--%M-%S')"
+
+
       # Builder l'image docker
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/nlt-text-classification:$(date +%s)
+        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/nlt-text-classification:${{ steps.date.outputs.date }}
 
       - name: Docker Push
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/nlt-text-classification:$(date +%s)
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/nlt-text-classification:${{ steps.date.outputs.date }}
 
       # Arreter le conteneur filter
       - name: Stop Docker Container
         run: docker stop $(docker ps --filter "ancestor=nlt-text-classification" -q)
-    
+
 # Processus du pipeline CD
   deploy:
     needs: build
@@ -68,3 +72,5 @@ jobs:
           deploy_url: ${{ secrets.RENDER_DEPLOY_HOCK_URL }}
       run: |
         curl "$deploy_url"
+
+
