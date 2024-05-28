@@ -6,10 +6,9 @@ nlp = spacy.load("en_core_web_sm")
 import streamlit as st
 import matplotlib.pyplot as plt 
 import matplotlib
-from utils import CnnClassifier, get_category,get_cat, LrClassifier
+from utils import CnnClassifier, LrClassifier, get_category,get_cat, progress
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from PIL import Image
-import time
 
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -25,6 +24,7 @@ st.sidebar.title("NLP")
 st.sidebar.markdown("""
 Le traitement du langage naturel(NLP) consiste à utiliser des ordinateurs pour traiter du texte ou de la parole en langage naturel. 
 """)
+
 with st.sidebar:
     choice = st.radio(
         "Selectionner un type de model",activity)
@@ -38,16 +38,6 @@ st.markdown(html_temp,unsafe_allow_html=True)
 # image = Image.open('images/speech-text.png')
 image = Image.open('img/nlp.jpeg')
 st.image(image)
-
-
-def progress():
-    my_bar = st.progress(0)
-    for percent_complete in range(100):
-        time.sleep(0.01)
-        my_bar.progress(percent_complete + 1)
-        if percent_complete == 50:
-            st.write("**Graphique de prédiction:**")
-        my_bar.progress(percent_complete + 1)
 
 
 
@@ -70,11 +60,11 @@ if choice == 'Machine learning':
                 with st.spinner("Votre texte est en cours de prédiction..."):
                     if "Logistic Regression" in options and len(options) == 1:
 
-                        st.text("Original Text::\n{}".format(text))
+                        # st.info("Original Text::\n{}".format(text))
                         model = LrClassifier()
                         # text_vector = model.read_extract_text_file(text)
                         # text_vector = model.convert_text_to_vector_lr(text)
-                        text_vector = model.predict_result(text)
+                        text_vector = model.transform_text(text)
                         predictions, pred_proba = model.predict(text_vector)
                     
                     else:
