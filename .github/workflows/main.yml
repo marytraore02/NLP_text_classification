@@ -2,7 +2,7 @@ name: NLP text classification process CI/CD
 
 on: 
   push:
-    branches: [ "main" ]
+    branches: [ "test" ]
   pull_request:
     branches: [ "main" ]
 
