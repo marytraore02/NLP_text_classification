@@ -1,0 +1,37 @@
+name: NLP text classification
+
+# Processus du pipeline CI
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Docker image 
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/nlp-app:v1 .
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker Push
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/nlp-app:v1
+
+# Processus du pipeline CI
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy
+      env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOCK_URL }}
+      run: |
+        curl "$deploy_url"

@@ -11,12 +11,7 @@ from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 from PIL import Image
 
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
-
-# for custom CSS style
-# with open("style.css") as f:
-#     st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
-    
+st.set_option('deprecation.showPyplotGlobalUse', False)   
 
 
 activity = ['Machine learning','Deep learning', 'NLP process']
