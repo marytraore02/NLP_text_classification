@@ -1,0 +1,75 @@
+name: NLP text classification process CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v3
+
+      # Docker image 
+      - name: Build Docker Image
+        # run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/nlp-app:$(date +%s)
+        run: docker build -t nlt-text-classification -f Dockerfile .
+
+      # Lister les images
+      - name: List of Docker images
+        run: docker image ls
+
+      # Lancer le conteneur docker
+      - name: Run Docker Container
+        run: docker run -d -p 8501:8501 nlt-text-classification
+
+      # Lister les conteneur
+      - name: List of Docker containers
+        run: docker ps -a
+
+      # Filtrer l'ID des conteneurs pour les images suivantes
+      - name: List of Docker container Filter
+        run: |
+          docker ps --filter "ancestor=nlt-text-classification" -q
+
+      # Me connecter sur dockerHub
+      - name: Login to Docker Hub
+        run: | # log into docker hub account
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      # Recuperer la date et l'heure aujourd'hui
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d--%M-%S')"
+
+
+      # Builder l'image docker
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/nlt-text-classification:${{ steps.date.outputs.date }}
+
+      - name: Docker Push
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/nlt-text-classification:${{ steps.date.outputs.date }}
+
+      # Arreter le conteneur filter
+      - name: Stop Docker Container
+        run: docker stop $(docker ps --filter "ancestor=nlt-text-classification" -q)
+
+# Processus du pipeline CD
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #   - name: Deploy
+  #     env:
+  #         deploy_url: ${{ secrets.RENDER_DEPLOY_HOCK_URL }}
+  #     run: |
+  #       curl "$deploy_url"
+
+
