@@ -2,7 +2,7 @@ name: NLP text classification process CI/CD
 
 on: 
   push:
-    branches: [ "main", "test" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -27,6 +27,7 @@ jobs:
       # Lancer le conteneur docker
       - name: Run Docker Container
         run: docker run -d -p 8501:8501 nlt-text-classification
+        # docker run -v /Users/marytraore/Desktop/NLP_text_classification:/app -d -p 8501:8501 nlt-text-classification
 
       # Lister les conteneur
       - name: List of Docker containers
